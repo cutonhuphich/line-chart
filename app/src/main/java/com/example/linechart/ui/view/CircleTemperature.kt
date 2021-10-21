@@ -8,7 +8,6 @@ import androidx.core.content.ContextCompat
 import com.example.linechart.R
 import kotlin.math.PI
 import kotlin.math.cos
-import kotlin.math.round
 import kotlin.math.sin
 
 class CircleTemperature : View {
@@ -20,15 +19,15 @@ class CircleTemperature : View {
         context,
         attrs,
         defStyleAttr
-    ) {
+    )
 
-    }
+    private var center = PointF()
 
     private val paintCircle: Paint = Paint().apply {
         isAntiAlias = true
         strokeJoin = Paint.Join.ROUND
         color = ContextCompat.getColor(context, R.color.black)
-        style = Paint.Style.STROKE
+        style = Paint.Style.FILL
         strokeWidth = 5f
     }
 
@@ -37,39 +36,36 @@ class CircleTemperature : View {
         strokeCap = Paint.Cap.ROUND
         style = Paint.Style.STROKE
         color = ContextCompat.getColor(context, R.color.black)
-
     }
+
     private val paintLine = Paint().apply {
         strokeWidth = 10f
         strokeCap = Paint.Cap.ROUND
         style = Paint.Style.STROKE
         color = ContextCompat.getColor(context, R.color.black)
-
     }
 
     override fun onDraw(canvas: Canvas?) {
         super.onDraw(canvas)
-        drawCircle(canvas)
-        drawBorder(canvas)
         drawLine(canvas)
+        drawBorder(canvas)
+        drawCircle(canvas)
     }
 
 
-    private fun getRadiusCircle() =
+    private fun getRadius() =
         if (width > height) calculateRadius(height) else calculateRadius(width)
 
-    private fun getRadiusBorder() = getRadiusCircle() + 50F
-    private fun getRadiusLine() = getRadiusBorder() + 50F
+    private fun getRadiusLine() = getRadius() - MARGIN_CONTENT - LENGTH_LINE_LONG
+    private fun getRadiusBorder() = getRadiusLine() - MARGIN_CONTENT
+    private fun getRadiusCircle() = getRadiusBorder() - MARGIN_CONTENT
 
-    private fun calculateRadius(d: Int): Float = d / 2F - 200f
-
-    private var center = PointF()
-
+    private fun calculateRadius(d: Int): Float = d / 2F
 
     override fun onSizeChanged(w: Int, h: Int, oldw: Int, oldh: Int) {
         super.onSizeChanged(w, h, oldw, oldh)
-        center.x = w / 2f
-        center.y = h / 2f
+        center.x = w / 2F
+        center.y = h / 2F
     }
 
     private fun drawCircle(canvas: Canvas?) {
@@ -77,39 +73,40 @@ class CircleTemperature : View {
     }
 
     private fun drawBorder(canvas: Canvas?) {
-
-        canvas?.drawPoint(100f, 100f, paintCircle)
         val rectF = RectF(
             center.x - getRadiusBorder(),
             center.y - getRadiusBorder(),
             center.x + getRadiusBorder(),
             center.y + getRadiusBorder()
         )
-
         canvas?.drawArc(rectF, START_ANGLE, SWEEP_ANGLE, false, paintBorder)
     }
 
     private fun drawLine(canvas: Canvas?) {
-
         for (degree in DEGREE_START_DRAW_LINE..DEGREE_END_DRAW_LINE step 10) {
+            val xValue = sin(degreeToRadian(degree)).toFloat()
+            val yValue = cos(degreeToRadian(degree)).toFloat()
 
-            val startX = center.x + (sin(degree * PI / 180) * getRadiusLine()).toFloat()
-            val startY = center.y + (cos(degree * PI / 180) * getRadiusLine()).toFloat()
+            val startX = center.x + xValue * getRadiusLine()
+            val startY = center.y + yValue * getRadiusLine()
+            val endX = center.x + xValue * (getRadiusLine() + getLengthLine(degree))
+            val endY = center.y + yValue * (getRadiusLine() + getLengthLine(degree))
 
-            val endX =
-                center.x + (sin(degree * PI / 180) * (getRadiusLine() + LENGTH_LINE_SHORT)).toFloat()
-            val endY =
-                center.y + (cos(degree * PI / 180) * (getRadiusLine() + LENGTH_LINE_SHORT)).toFloat()
             canvas?.drawLine(startX, startY, endX, endY, paintLine)
-
         }
     }
 
+    private fun getLengthLine(degree: Int): Float =
+        if (degree % 60 == 0) LENGTH_LINE_LONG else LENGTH_LINE_SHORT
+
+    private fun degreeToRadian(degree: Int) = degree * PI / 180
+
     companion object {
         private const val LENGTH_LINE_SHORT = 50F
-        private const val LENGTH_LINE_LONG = 70F
-        private const val DEGREE_START_DRAW_LINE = 45
-        private const val DEGREE_END_DRAW_LINE = 315
+        private const val LENGTH_LINE_LONG = 80F
+        private const val DEGREE_START_DRAW_LINE = 60
+        private const val DEGREE_END_DRAW_LINE = 300
+        private const val MARGIN_CONTENT = 50F
 
         private const val START_ANGLE = 150F
         private const val SWEEP_ANGLE = 240F
