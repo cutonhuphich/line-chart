@@ -1,5 +1,6 @@
 package com.example.linechart.ui.view
 
+import android.animation.ValueAnimator
 import android.content.Context
 import android.graphics.*
 import android.util.AttributeSet
@@ -10,7 +11,7 @@ import kotlin.math.PI
 import kotlin.math.cos
 import kotlin.math.sin
 
-class CircleTemperature : View {
+class CircleTemperature : View, ValueAnimator.AnimatorUpdateListener {
     constructor(context: Context) : this(context, null)
 
     constructor(context: Context, attrs: AttributeSet?) : this(context, attrs, 0)
@@ -21,19 +22,24 @@ class CircleTemperature : View {
         defStyleAttr
     )
 
-    private var minValue = -20F
-    private fun setMinValue(value: Float) {
-        this.minValue = value
-    }
+    private val minValue = -20F
+//     fun setMinValue(value: Float) {
+//        this.minValue = value
+//        invalidate()
+//    }
 
-    private var maxValue = 20F
-    private fun setMaxValue(value: Float) {
-        this.maxValue = value
-    }
+    private val maxValue = 20F
+//     fun setMaxValue(value: Float) {
+//        this.maxValue = value
+//        invalidate()
+//    }
 
     private var currentValue = minValue
-    private fun setValue(value: Float) {
-        this.currentValue = value
+    fun setValue(value: Float) {
+        if (value > minValue && value <= maxValue) {
+            this.currentValue = value
+            startAnimation()
+        }
     }
 
     private val bounds = Rect()
@@ -68,12 +74,12 @@ class CircleTemperature : View {
         textSize = TEXT_SIZE
     }
 
-
     override fun onDraw(canvas: Canvas?) {
         super.onDraw(canvas)
         drawLine(canvas)
         drawBorder(canvas)
         drawCircle(canvas)
+        drawTextCenter(canvas)
     }
 
     private fun getRadius() =
@@ -95,6 +101,17 @@ class CircleTemperature : View {
         canvas?.drawCircle(centerPoint.x, centerPoint.y, getRadiusCircle(), paintCircle)
     }
 
+    private fun drawTextCenter(canvas: Canvas?) {
+        val valueText = resources.getString(R.string.temp, currentValue.toInt())
+        paintText.reset()
+        paintText.color = ContextCompat.getColor(context, R.color.white)
+        paintText.textSize = TEXT_SIZE_CENTER
+        paintText.getTextBounds(valueText, 0, valueText.length, bounds)
+        val xPosition = centerPoint.x - bounds.width() / 2
+        val yPosition = centerPoint.y + bounds.height() / 2
+        canvas?.drawText(valueText, xPosition, yPosition, paintText)
+    }
+
     private fun drawBorder(canvas: Canvas?) {
         val rectF = RectF(
             centerPoint.x - getRadiusBorder(),
@@ -102,11 +119,11 @@ class CircleTemperature : View {
             centerPoint.x + getRadiusBorder(),
             centerPoint.y + getRadiusBorder()
         )
-        canvas?.drawArc(rectF, START_ANGLE, SWEEP_ANGLE, false, paintBorder)
+        canvas?.drawArc(rectF, START_ANGLE, sweepAngle, false, paintBorder)
     }
 
     private fun drawLine(canvas: Canvas?) {
-        var textValue = -minValue
+        var value = -minValue
         for (degree in DEGREE_START_DRAW_LINE..DEGREE_END_DRAW_LINE step getStepDegree().toInt()) {
             val xValue = sin(degreeToRadian(degree)).toFloat()
             val yValue = cos(degreeToRadian(degree)).toFloat()
@@ -119,13 +136,18 @@ class CircleTemperature : View {
 
             if (degree % 60 == 0) {
 
+                val stringValue = resources.getString(R.string.temp, value.toInt())
                 endX = centerPoint.x + xValue * (getRadiusLine() + LENGTH_LINE_LONG)
                 endY = centerPoint.y + yValue * (getRadiusLine() + LENGTH_LINE_LONG)
 
+
+                paintText.reset()
+                paintText.textSize = TEXT_SIZE
+                paintText.color = ContextCompat.getColor(context, R.color.black)
                 paintText.getTextBounds(
-                    textValue.toString(),
+                    stringValue,
                     0,
-                    textValue.toString().length,
+                    stringValue.length,
                     bounds
                 )
 
@@ -134,8 +156,8 @@ class CircleTemperature : View {
                     centerPoint.x + (xValue * (getRadiusLine() + MARGIN_TEXT)) - (bounds.width() / 2)
                 val yPosition =
                     centerPoint.y + (yValue * (getRadiusLine() + MARGIN_TEXT)) + (bounds.height() / 2)
-                canvas?.drawText(textValue.toString(), xPosition, yPosition, paintText)
-                textValue -= getStepValue()
+                canvas?.drawText(stringValue, xPosition, yPosition, paintText)
+                value -= getStepValue()
 
             } else {
                 endX = centerPoint.x + xValue * (getRadiusLine() + LENGTH_LINE_SHORT)
@@ -143,6 +165,23 @@ class CircleTemperature : View {
             }
             canvas?.drawLine(startX, startY, endX, endY, paintLine)
         }
+    }
+
+    private var sweepAngle = 0.5F
+
+    private fun startAnimation() {
+        val animator: ValueAnimator = ValueAnimator.ofInt(minValue.toInt(), currentValue.toInt())
+        animator.duration = DELAY
+        animator.addUpdateListener(this)
+        animator.start()
+    }
+
+    override fun onAnimationUpdate(p0: ValueAnimator?) {
+        val valueTemp = p0?.animatedValue as? Int
+        if (valueTemp != null) {
+            sweepAngle = (valueTemp + 20) * SWEEP_ANGLE
+        }
+        invalidate()
     }
 
     private fun getSumValue() = maxValue - minValue
@@ -154,8 +193,8 @@ class CircleTemperature : View {
     private fun degreeToRadian(degree: Int) = degree * PI / 180
 
     companion object {
-        private const val LENGTH_LINE_SHORT = 50F
-        private const val LENGTH_LINE_LONG = 80F
+        private const val LENGTH_LINE_SHORT = 30F
+        private const val LENGTH_LINE_LONG = 50F
         private const val MARGIN_TEXT = LENGTH_LINE_LONG + 50F
 
         private const val DEGREE_START_DRAW_LINE = 60
@@ -164,13 +203,16 @@ class CircleTemperature : View {
         private const val MARGIN_CIRCLE = 30F
 
         private const val START_ANGLE = 150F
-        private const val SWEEP_ANGLE = 240F
+        private const val SWEEP_ANGLE = 240F / 40
 
         private const val STROKE_WIDTH_PAIN_LINE = 8F
         private const val STROKE_WIDTH_PAIN_BORDER = 30F
 
-        private const val TEXT_SIZE = 30F
+        private const val TEXT_SIZE = 35F
+        private const val TEXT_SIZE_CENTER = 50F
 
         private const val DISPLAY_LEVEL = 4
+
+        private const val DELAY = 1000L
     }
 }

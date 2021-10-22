@@ -6,11 +6,21 @@
     android:orientation="vertical"
     tools:context=".ui.activity.MainActivity">
 
-    <com.example.linechart.ui.view.CircleTemperature
+    <com.example.linechart.ui.view.LineChart
+        android:id="@+id/lineChart"
         android:layout_width="match_parent"
-        android:layout_height="300dp" />
+        android:layout_height="match_parent"
+        android:layout_weight="1" />
+
+    <com.example.linechart.ui.view.CircleTemperature
+        android:id="@+id/circleTemperature"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_weight="1"
+        android:background="@color/background_temp" />
 
     <Button
+        android:id="@+id/btnStart"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:text="@string/start" />

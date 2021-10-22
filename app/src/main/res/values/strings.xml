@@ -1,4 +1,5 @@
 <resources>
     <string name="app_name">Line Chart</string>
     <string name="start">Start</string>
+    <string name="temp">%d °C</string>
 </resources>

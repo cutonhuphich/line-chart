@@ -78,7 +78,7 @@ class LineChart : View {
     override fun onDraw(canvas: Canvas?) {
         super.onDraw(canvas)
         path.reset()
-        drawHorizontalLine(canvas)
+       // drawHorizontalLine(canvas)
     }
 
     private fun drawXAxisValue(canvas: Canvas?) {
@@ -97,10 +97,5 @@ class LineChart : View {
         private const val MARGIN_TOP_PARENT = 0.08f
         private const val MARGIN_RIGHT_PARENT = 0.08f
         private const val MARGIN_BOTTOM_PARENT = 0.08f
-
-        private const val SIZE_TEXT = 36F
-        private const val MARGIN_TEXT = 0.03f
-        private const val MARGIN_CONTENT = 0.05f
-        private const val WIDTH_COLUMN = 100f
     }
 }
