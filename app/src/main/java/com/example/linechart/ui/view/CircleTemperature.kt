@@ -3,11 +3,9 @@ package com.example.linechart.ui.view
 import android.content.Context
 import android.graphics.*
 import android.util.AttributeSet
-import android.util.TypedValue
 import android.view.View
 import androidx.core.content.ContextCompat
 import com.example.linechart.R
-import java.nio.channels.FileLock
 import kotlin.math.PI
 import kotlin.math.cos
 import kotlin.math.sin
@@ -82,8 +80,8 @@ class CircleTemperature : View {
         if (width > height) calculateRadius(height) else calculateRadius(width)
 
     private fun getRadiusLine() = getRadius() - MARGIN_CONTENT - LENGTH_LINE_LONG
-    private fun getRadiusBorder() = getRadiusLine() - MARGIN_CONTENT
-    private fun getRadiusCircle() = getRadiusBorder() - MARGIN_CONTENT
+    private fun getRadiusBorder() = getRadiusLine() - MARGIN_CIRCLE
+    private fun getRadiusCircle() = getRadiusBorder() - MARGIN_CIRCLE
 
     private fun calculateRadius(d: Int) = d / 2F
 
@@ -108,7 +106,7 @@ class CircleTemperature : View {
     }
 
     private fun drawLine(canvas: Canvas?) {
-        var textValue = minValue
+        var textValue = -minValue
         for (degree in DEGREE_START_DRAW_LINE..DEGREE_END_DRAW_LINE step getStepDegree().toInt()) {
             val xValue = sin(degreeToRadian(degree)).toFloat()
             val yValue = cos(degreeToRadian(degree)).toFloat()
@@ -133,11 +131,11 @@ class CircleTemperature : View {
 
                 //Draw text Value
                 val xPosition =
-                    centerPoint.x + (xValue * (getRadiusLine() + LENGTH_LINE_LONG + 50f))+(xValue * bounds.width() / 2)
+                    centerPoint.x + (xValue * (getRadiusLine() + MARGIN_TEXT)) - (bounds.width() / 2)
                 val yPosition =
-                    centerPoint.y + yValue * (getRadiusLine() + LENGTH_LINE_LONG + 50f)
+                    centerPoint.y + (yValue * (getRadiusLine() + MARGIN_TEXT)) + (bounds.height() / 2)
                 canvas?.drawText(textValue.toString(), xPosition, yPosition, paintText)
-                textValue += getStepValue()
+                textValue -= getStepValue()
 
             } else {
                 endX = centerPoint.x + xValue * (getRadiusLine() + LENGTH_LINE_SHORT)
@@ -153,28 +151,23 @@ class CircleTemperature : View {
     private fun getStepDegree() =
         (DEGREE_END_DRAW_LINE - DEGREE_START_DRAW_LINE) * getStepValue() / (getSumValue() * 5)
 
-    private fun calculateValue(stepValue: Float): List<Float> {
-        val values = mutableListOf<Float>()
-        for (i in 0 until DISPLAY_LEVEL) {
-            values.add(minValue + stepValue)
-        }
-        return values
-    }
-
     private fun degreeToRadian(degree: Int) = degree * PI / 180
 
     companion object {
         private const val LENGTH_LINE_SHORT = 50F
         private const val LENGTH_LINE_LONG = 80F
+        private const val MARGIN_TEXT = LENGTH_LINE_LONG + 50F
+
         private const val DEGREE_START_DRAW_LINE = 60
         private const val DEGREE_END_DRAW_LINE = 300
-        private const val MARGIN_CONTENT = 50F
+        private const val MARGIN_CONTENT = 80F
+        private const val MARGIN_CIRCLE = 30F
 
         private const val START_ANGLE = 150F
         private const val SWEEP_ANGLE = 240F
 
-        private const val STROKE_WIDTH_PAIN_LINE = 10F
-        private const val STROKE_WIDTH_PAIN_BORDER = 40F
+        private const val STROKE_WIDTH_PAIN_LINE = 8F
+        private const val STROKE_WIDTH_PAIN_BORDER = 30F
 
         private const val TEXT_SIZE = 30F
 
