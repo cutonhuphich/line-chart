@@ -4,7 +4,6 @@ import android.animation.ValueAnimator
 import android.content.Context
 import android.graphics.*
 import android.util.AttributeSet
-import android.util.Log
 import android.view.View
 import androidx.core.content.ContextCompat
 import com.example.linechart.R
@@ -33,6 +32,10 @@ class CircleTemperature : View, ValueAnimator.AnimatorUpdateListener {
         typedArray.recycle()
     }
 
+    private val gradientColors = intArrayOf(
+        ContextCompat.getColor(context, R.color.gradient_start),
+        ContextCompat.getColor(context, R.color.gradient_end),
+    )
     private var rectF = RectF()
     private var minValue: Int = DEFAULT_MIN_VALUE
     private var maxValue: Int = DEFAULT_MAX_VALUE
@@ -67,9 +70,8 @@ class CircleTemperature : View, ValueAnimator.AnimatorUpdateListener {
         paintCircle.apply {
             isAntiAlias = true
             strokeJoin = Paint.Join.ROUND
-            color = ContextCompat.getColor(context, R.color.green)
             style = Paint.Style.FILL
-            shader
+            maskFilter = BlurMaskFilter(20f, BlurMaskFilter.Blur.INNER)
         }
 
         paintProgress.apply {
@@ -83,7 +85,7 @@ class CircleTemperature : View, ValueAnimator.AnimatorUpdateListener {
             strokeWidth = radius * STROKE_WIDTH_PAIN_LINE
             strokeCap = Paint.Cap.ROUND
             style = Paint.Style.STROKE
-            color = ContextCompat.getColor(context, R.color.background_progress)
+            color = ContextCompat.getColor(context, R.color.background_line)
         }
 
         paintText.apply {
@@ -150,12 +152,26 @@ class CircleTemperature : View, ValueAnimator.AnimatorUpdateListener {
 
 
     private fun drawCircle(canvas: Canvas?) {
+        paintCircle.color = ContextCompat.getColor(context, R.color.grey)
+        paintCircle.shader = null
+        canvas?.drawCircle(centerPoint.x, centerPoint.y, radius.toFloat(), paintCircle)
+
+        paintCircle.shader = LinearGradient(
+            centerPoint.x,
+            centerPoint.y - radius,
+            centerPoint.x,
+            centerPoint.y + radius,
+            gradientColors,
+            null,
+            Shader.TileMode.CLAMP
+        )
         canvas?.drawCircle(centerPoint.x, centerPoint.y, radius.toFloat(), paintCircle)
     }
 
     private fun drawTextCenter(canvas: Canvas?) {
         paintText.apply {
             reset()
+            isFakeBoldText = true
             textSize = textSizeValueCenter
             color = ContextCompat.getColor(context, R.color.white)
         }
@@ -199,9 +215,24 @@ class CircleTemperature : View, ValueAnimator.AnimatorUpdateListener {
         val startAngle = START_ANGLE
         var sweepAngle = TOTAL_SWIPE
         if (isDrawBackground) {
-            paintProgress.color = ContextCompat.getColor(context, R.color.background_progress)
+            paintProgress.apply {
+                color = ContextCompat.getColor(context, R.color.background_progress)
+                shader = null
+            }
         } else {
-            paintProgress.color = ContextCompat.getColor(context, R.color.green)
+
+            paintProgress.apply {
+                shader = LinearGradient(
+                    centerPoint.x - radiusProgress,
+                    centerPoint.y,
+                    centerPoint.x + radiusProgress,
+                    centerPoint.y,
+                    gradientColors,
+                    null,
+                    Shader.TileMode.CLAMP
+                )
+                color = ContextCompat.getColor(context, R.color.green)
+            }
             sweepAngle = (currentValue - minValue) * SWEEP_ANGLE
             if (sweepAngle == 0F) sweepAngle = 0.5F
         }
@@ -212,9 +243,23 @@ class CircleTemperature : View, ValueAnimator.AnimatorUpdateListener {
         val startDegree = DEGREE_START_DRAW_LINE
         var endDegree = DEGREE_END_DRAW_LINE
         if (isDrawBackground) {
-            paintLine.color = ContextCompat.getColor(context, R.color.background_progress)
+            paintLine.apply {
+                color = ContextCompat.getColor(context, R.color.background_line)
+                shader = null
+            }
         } else {
-            paintLine.color = ContextCompat.getColor(context, R.color.green)
+            paintLine.apply {
+                color = ContextCompat.getColor(context, R.color.green)
+                shader = LinearGradient(
+                    centerPoint.x - radiusLine,
+                    centerPoint.y,
+                    centerPoint.x + radiusLine,
+                    centerPoint.y,
+                    gradientColors,
+                    null,
+                    Shader.TileMode.CLAMP
+                )
+            }
             endDegree = ((currentValue.toInt() - minValue) * stepDegreeLine / 2) + startDegree
         }
 
@@ -254,7 +299,6 @@ class CircleTemperature : View, ValueAnimator.AnimatorUpdateListener {
         invalidate()
     }
 
-
     private fun degreeToRadian(degree: Int) = degree * PI / 180
 
     companion object {
@@ -271,7 +315,7 @@ class CircleTemperature : View, ValueAnimator.AnimatorUpdateListener {
         private const val LENGTH_LINE_LONG = 0.25F
 
         private const val TEXT_SIZE = 0.2F
-        private const val TEXT_SIZE_CENTER = 0.3F
+        private const val TEXT_SIZE_CENTER = 0.35F
 
         private const val DEGREE_LONG_LINE = 240 / DISPLAY_LEVEL
         private const val DEGREE_START_DRAW_LINE = 60

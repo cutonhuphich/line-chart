@@ -20,7 +20,7 @@ class MainActivity : AppCompatActivity() {
 
     private fun initAction() {
         buttonStart?.setOnClickListener {
-            circleTemperature?.setValue(15F)
+            circleTemperature?.setValue(10F)
         }
     }
 

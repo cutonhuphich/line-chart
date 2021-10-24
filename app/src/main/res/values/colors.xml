@@ -10,9 +10,10 @@
     <color name="grey">#808080</color>
     <color name="blue">#6f98c3</color>
     <color name="green">#63a84a</color>
-    <color name="background_temp">#e0fadb</color>
-    <color name="background_progress">#c8cfcd</color>
+    <color name="background_temp">#eefaee</color>
+    <color name="background_progress">#e1e5e9</color>
+    <color name="background_line">#c9d1ce</color>
 
-    <color name="gradient_start">#66badf</color>
-    <color name="gradient_end">#83c274</color>
+    <color name="gradient_start">#8fcff1</color>
+    <color name="gradient_end">#6baf39</color>
 </resources>
