@@ -1,10 +1,10 @@
 package com.example.linechart.ui.view
 
 import android.animation.ValueAnimator
+import android.annotation.SuppressLint
 import android.content.Context
 import android.graphics.*
 import android.util.AttributeSet
-import android.util.Log
 import android.view.MotionEvent
 import android.view.View
 import androidx.core.content.ContextCompat
@@ -25,6 +25,7 @@ class CircleTemperature : View, ValueAnimator.AnimatorUpdateListener {
         }
     }
 
+    @SuppressLint("CustomViewStyleable")
     private fun init(attrs: AttributeSet?) {
         val typedArray = context.obtainStyledAttributes(attrs, R.styleable.CircleTemperatureView)
         radius = typedArray.getInt(R.styleable.CircleTemperatureView_radius, DEFAULT_RADIUS)
@@ -102,7 +103,7 @@ class CircleTemperature : View, ValueAnimator.AnimatorUpdateListener {
 
     private var currentValue = minValue.toFloat()
     fun setValue(value: Float) {
-        if (value > minValue && value <= maxValue) {
+        if (value >= minValue && value <= maxValue) {
             beforeValue = currentValue
             this.currentValue = value
             startAnimation()
@@ -296,6 +297,7 @@ class CircleTemperature : View, ValueAnimator.AnimatorUpdateListener {
         }
     }
 
+    @SuppressLint("ClickableViewAccessibility")
     override fun onTouchEvent(event: MotionEvent?): Boolean {
         if (event?.action == MotionEvent.ACTION_MOVE ) {
             isTouch = true
