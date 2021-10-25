@@ -11,7 +11,9 @@
         android:id="@+id/lineChart"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:layout_weight="1" />
+        android:layout_weight="1"
+        app:lineMaxValue="10"
+        app:lineMinValue="-30" />
 
     <com.example.linechart.ui.view.CircleTemperature
         android:id="@+id/circleTemperature"
@@ -19,8 +21,8 @@
         android:layout_height="match_parent"
         android:layout_weight="1"
         android:background="@color/background_temp"
-        app:max="20"
-        app:min="-20"
+        app:circleMaxValue="20"
+        app:circleMinValue="-20"
         app:radius="200" />
 
     <Button

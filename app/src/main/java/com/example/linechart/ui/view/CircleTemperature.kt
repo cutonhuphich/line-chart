@@ -29,8 +29,10 @@ class CircleTemperature : View, ValueAnimator.AnimatorUpdateListener {
     private fun init(attrs: AttributeSet?) {
         val typedArray = context.obtainStyledAttributes(attrs, R.styleable.CircleTemperatureView)
         radius = typedArray.getInt(R.styleable.CircleTemperatureView_radius, DEFAULT_RADIUS)
-        minValue = typedArray.getInt(R.styleable.CircleTemperatureView_min, DEFAULT_MIN_VALUE)
-        maxValue = typedArray.getInt(R.styleable.CircleTemperatureView_max, DEFAULT_MAX_VALUE)
+        minValue =
+            typedArray.getInt(R.styleable.CircleTemperatureView_circleMinValue, DEFAULT_MIN_VALUE)
+        maxValue =
+            typedArray.getInt(R.styleable.CircleTemperatureView_circleMaxValue, DEFAULT_MAX_VALUE)
         currentValue = minValue.toFloat()
         typedArray.recycle()
     }
@@ -76,7 +78,7 @@ class CircleTemperature : View, ValueAnimator.AnimatorUpdateListener {
             isAntiAlias = true
             strokeJoin = Paint.Join.ROUND
             style = Paint.Style.FILL
-            maskFilter = BlurMaskFilter(20f, BlurMaskFilter.Blur.INNER)
+             maskFilter = BlurMaskFilter(20f, BlurMaskFilter.Blur.INNER)
         }
 
         paintProgress.apply {
@@ -138,7 +140,6 @@ class CircleTemperature : View, ValueAnimator.AnimatorUpdateListener {
         centerPoint.x = w / 2F
         centerPoint.y = h / 2F
     }
-
 
     override fun onDraw(canvas: Canvas?) {
         super.onDraw(canvas)
@@ -299,7 +300,7 @@ class CircleTemperature : View, ValueAnimator.AnimatorUpdateListener {
 
     @SuppressLint("ClickableViewAccessibility")
     override fun onTouchEvent(event: MotionEvent?): Boolean {
-        if (event?.action == MotionEvent.ACTION_MOVE ) {
+        if (event?.action == MotionEvent.ACTION_MOVE) {
             isTouch = true
             val positionTouchX = event.x
             val positionTouchY = event.y
@@ -365,7 +366,7 @@ class CircleTemperature : View, ValueAnimator.AnimatorUpdateListener {
         private const val STROKE_WIDTH_PAIN_LINE = 0.03F
         private const val STROKE_WIDTH_PAIN_PROGRESS = 0.15F
 
-        private const val SPACE_CURRENT_POINT = 60F
+        private const val SPACE_CURRENT_POINT = 70F
 
         private const val DELAY = 1000L
     }

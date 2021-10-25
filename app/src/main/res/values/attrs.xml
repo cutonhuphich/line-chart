@@ -1,8 +1,14 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <declare-styleable name="CircleTemperatureView">
-        <attr name="max" format="integer" />
-        <attr name="min" format="integer" />
-        <attr name="radius" format="integer"/>
+        <attr name="circleMaxValue" format="integer" />
+        <attr name="circleMinValue" format="integer" />
+        <attr name="radius" format="integer" />
     </declare-styleable>
+
+    <declare-styleable name="LineChartView">
+        <attr name="lineMaxValue" format="integer" />
+        <attr name="lineMinValue" format="integer" />
+    </declare-styleable>
+
 </resources>
