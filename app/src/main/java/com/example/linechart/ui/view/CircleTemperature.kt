@@ -4,6 +4,8 @@ import android.animation.ValueAnimator
 import android.content.Context
 import android.graphics.*
 import android.util.AttributeSet
+import android.util.Log
+import android.view.MotionEvent
 import android.view.View
 import androidx.core.content.ContextCompat
 import com.example.linechart.R
@@ -61,10 +63,12 @@ class CircleTemperature : View, ValueAnimator.AnimatorUpdateListener {
     private val boundsTextValue = Rect()
     private val boundsTextValueCenter = Rect()
     private var centerPoint = PointF()
+    private var currentPoint = PointF()
     private val paintCircle: Paint = Paint()
     private val paintProgress = Paint()
     private val paintLine = Paint()
     private val paintText = Paint()
+    private var isTouch = false
 
     private fun initPain() {
         paintCircle.apply {
@@ -94,9 +98,12 @@ class CircleTemperature : View, ValueAnimator.AnimatorUpdateListener {
         }
     }
 
+    private var beforeValue = minValue.toFloat()
+
     private var currentValue = minValue.toFloat()
     fun setValue(value: Float) {
         if (value > minValue && value <= maxValue) {
+            beforeValue = currentValue
             this.currentValue = value
             startAnimation()
         }
@@ -231,14 +238,19 @@ class CircleTemperature : View, ValueAnimator.AnimatorUpdateListener {
                     null,
                     Shader.TileMode.CLAMP
                 )
-                color = ContextCompat.getColor(context, R.color.green)
             }
             sweepAngle = (currentValue - minValue) * SWEEP_ANGLE
             if (sweepAngle == 0F) sweepAngle = 0.5F
+            val xValue = sin(degreeToRadian(DEGREE_START_DRAW_LINE + sweepAngle.toInt())).toFloat()
+            val yValue = cos(degreeToRadian(DEGREE_START_DRAW_LINE + sweepAngle.toInt())).toFloat()
+
+            currentPoint.x = centerPoint.x - xValue * radiusProgress
+            currentPoint.y = centerPoint.y + yValue * radiusProgress
         }
         canvas?.drawArc(rectF, startAngle, sweepAngle, false, paintProgress)
     }
 
+    private var currentDegree = DEGREE_START_DRAW_LINE
     private fun drawLine(canvas: Canvas?, isDrawBackground: Boolean) {
         val startDegree = DEGREE_START_DRAW_LINE
         var endDegree = DEGREE_END_DRAW_LINE
@@ -249,7 +261,6 @@ class CircleTemperature : View, ValueAnimator.AnimatorUpdateListener {
             }
         } else {
             paintLine.apply {
-                color = ContextCompat.getColor(context, R.color.green)
                 shader = LinearGradient(
                     centerPoint.x - radiusLine,
                     centerPoint.y,
@@ -261,6 +272,7 @@ class CircleTemperature : View, ValueAnimator.AnimatorUpdateListener {
                 )
             }
             endDegree = ((currentValue.toInt() - minValue) * stepDegreeLine / 2) + startDegree
+            currentDegree = endDegree
         }
 
         for (degree in startDegree..endDegree step stepDegreeLine) {
@@ -284,9 +296,30 @@ class CircleTemperature : View, ValueAnimator.AnimatorUpdateListener {
         }
     }
 
+    override fun onTouchEvent(event: MotionEvent?): Boolean {
+        if (event?.action == MotionEvent.ACTION_MOVE ) {
+            isTouch = true
+            val positionTouchX = event.x
+            val positionTouchY = event.y
+            if (positionTouchX <= currentPoint.x + SPACE_CURRENT_POINT && positionTouchX >= currentPoint.x - SPACE_CURRENT_POINT && positionTouchY <= currentPoint.y + SPACE_CURRENT_POINT && positionTouchY >= currentPoint.y - SPACE_CURRENT_POINT) {
+
+                val a = positionTouchX - centerPoint.x
+                val b = positionTouchY - centerPoint.y
+
+                var degreeTouch = -Math.toDegrees(atan2(a, b).toDouble())
+                if (degreeTouch < 0) degreeTouch += 360
+                if (degreeTouch.toInt() > currentDegree) {
+                    setValue(currentValue + 1)
+                } else setValue(currentValue - 1)
+            }
+            isTouch = false
+        }
+        return true
+    }
+
     private fun startAnimation() {
-        val animator: ValueAnimator = ValueAnimator.ofInt(minValue, currentValue.toInt())
-        animator.duration = DELAY
+        val animator: ValueAnimator = ValueAnimator.ofInt(beforeValue.toInt(), currentValue.toInt())
+        animator.duration = if (isTouch) 0 else DELAY
         animator.addUpdateListener(this)
         animator.start()
     }
@@ -329,6 +362,8 @@ class CircleTemperature : View, ValueAnimator.AnimatorUpdateListener {
 
         private const val STROKE_WIDTH_PAIN_LINE = 0.03F
         private const val STROKE_WIDTH_PAIN_PROGRESS = 0.15F
+
+        private const val SPACE_CURRENT_POINT = 60F
 
         private const val DELAY = 1000L
     }
