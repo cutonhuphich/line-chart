@@ -16,6 +16,12 @@ class MainActivity : AppCompatActivity() {
         setContentView(R.layout.activity_main)
         initView()
         initAction()
+        initData()
+    }
+
+    private fun initData() {
+        val data = floatArrayOf(9F, -5F, 7F, -15F, -5F, -11F, -4F, -12F, -6F, -11F, 5F, 0F, -13F, 15F)
+        lineChart?.setData(data)
     }
 
     private fun initAction() {
