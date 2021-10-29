@@ -5,15 +5,20 @@
     <color name="purple_700">#FF3700B3</color>
     <color name="teal_200">#FF03DAC5</color>
     <color name="teal_700">#FF018786</color>
-    <color name="black">#FF000000</color>
+    <color name="black">#000000</color>
+    <color name="black2">#676666</color>
     <color name="white">#FFFFFFFF</color>
-    <color name="grey">#808080</color>
-    <color name="blue">#6f98c3</color>
+    <color name="grey">#A7AEAB</color>
+    <color name="blue">#6F98C3</color>
     <color name="green">#63a84a</color>
     <color name="background_temp">#eefaee</color>
     <color name="background_progress">#e1e5e9</color>
     <color name="background_line">#c9d1ce</color>
 
     <color name="gradient_start">#8fcff1</color>
-    <color name="gradient_end">#6baf39</color>
+    <color name="gradient_end">#7bbc63</color>
+
+    <color name="gradient_start_line_chart">#9990B3D8</color>
+    <color name="gradient_end_line_chart">#0D90B3D8</color>
+    <color name="color_line_line_chart">#d1d5d6</color>
 </resources>

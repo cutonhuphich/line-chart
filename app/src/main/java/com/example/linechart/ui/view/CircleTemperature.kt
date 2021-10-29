@@ -78,7 +78,7 @@ class CircleTemperature : View, ValueAnimator.AnimatorUpdateListener {
             isAntiAlias = true
             strokeJoin = Paint.Join.ROUND
             style = Paint.Style.FILL
-             maskFilter = BlurMaskFilter(20f, BlurMaskFilter.Blur.INNER)
+            maskFilter = BlurMaskFilter(RADIUS_BLUR, BlurMaskFilter.Blur.INNER)
         }
 
         paintProgress.apply {
@@ -145,7 +145,6 @@ class CircleTemperature : View, ValueAnimator.AnimatorUpdateListener {
         super.onDraw(canvas)
         drawCircle(canvas)
         drawTextCenter(canvas)
-
         drawTextLevel(canvas)
         drawLineFull(canvas)
         drawProgressBorder(canvas)
@@ -161,7 +160,7 @@ class CircleTemperature : View, ValueAnimator.AnimatorUpdateListener {
 
 
     private fun drawCircle(canvas: Canvas?) {
-        paintCircle.color = ContextCompat.getColor(context, R.color.grey)
+        paintCircle.color = ContextCompat.getColor(context, R.color.black2)
         paintCircle.shader = null
         canvas?.drawCircle(centerPoint.x, centerPoint.y, radius.toFloat(), paintCircle)
 
@@ -253,6 +252,7 @@ class CircleTemperature : View, ValueAnimator.AnimatorUpdateListener {
     }
 
     private var currentDegree = DEGREE_START_DRAW_LINE
+
     private fun drawLine(canvas: Canvas?, isDrawBackground: Boolean) {
         val startDegree = DEGREE_START_DRAW_LINE
         var endDegree = DEGREE_END_DRAW_LINE
@@ -300,7 +300,7 @@ class CircleTemperature : View, ValueAnimator.AnimatorUpdateListener {
 
     @SuppressLint("ClickableViewAccessibility")
     override fun onTouchEvent(event: MotionEvent?): Boolean {
-        if (event?.action == MotionEvent.ACTION_MOVE) {
+        if (event?.action == MotionEvent.ACTION_MOVE || event?.action == MotionEvent.ACTION_DOWN) {
             isTouch = true
             val positionTouchX = event.x
             val positionTouchY = event.y
@@ -315,6 +315,8 @@ class CircleTemperature : View, ValueAnimator.AnimatorUpdateListener {
                     setValue(currentValue + 1)
                 } else setValue(currentValue - 1)
             }
+        }
+        if (event?.action == MotionEvent.ACTION_UP) {
             isTouch = false
         }
         return true
@@ -362,6 +364,8 @@ class CircleTemperature : View, ValueAnimator.AnimatorUpdateListener {
         private const val TOTAL_SWIPE = 240F
         private const val START_ANGLE = 150F
         private const val SWEEP_ANGLE = TOTAL_SWIPE / 40
+
+        private const val RADIUS_BLUR = 15F
 
         private const val STROKE_WIDTH_PAIN_LINE = 0.03F
         private const val STROKE_WIDTH_PAIN_PROGRESS = 0.15F
