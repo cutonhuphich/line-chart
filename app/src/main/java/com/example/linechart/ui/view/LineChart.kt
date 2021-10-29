@@ -32,10 +32,13 @@ class LineChart : View {
 
     private val path = Path()
     private val pathBackground = Path()
+    private val pathBoxValue = Path()
     private val paintHorizontalLine = Paint()
+    private val paintCircle = Paint()
     private val paintText = Paint()
     private val paintLine = Paint()
     private val paintBackground = Paint()
+    private val paintBoxValue = Paint()
     private val bounds = Rect()
 
     private val controlPoint1 = arrayListOf<PointF>()
@@ -114,6 +117,17 @@ class LineChart : View {
                 Shader.TileMode.CLAMP
             )
         }
+        paintCircle.apply {
+            isAntiAlias = true
+            style = Paint.Style.FILL
+            color = ContextCompat.getColor(context, R.color.blue)
+        }
+
+        paintBoxValue.apply {
+            isAntiAlias = true
+            style = Paint.Style.FILL
+            color = ContextCompat.getColor(context, R.color.green)
+        }
     }
 
     override fun onSizeChanged(w: Int, h: Int, oldw: Int, oldh: Int) {
@@ -137,7 +151,6 @@ class LineChart : View {
 
     private fun drawHorizontalLine(canvas: Canvas?) {
         path.reset()
-        path.fillType = Path.FillType.EVEN_ODD
         for (i in 0 until lineNumber) {
             path.moveTo(marginLeft, marginTop + (i * spaceBetweenLines))
             path.lineTo(marginLeft + widthContent, marginTop + (i * spaceBetweenLines))
@@ -159,7 +172,46 @@ class LineChart : View {
     }
 
     private fun drawViewText(canvas: Canvas?) {
+        val value =
+            (minValue - (((pointTouch.y - bottomPosition) * STEP) / spaceBetweenLines)).toInt()
+        val textValue = resources.getString(R.string.tempInt, value)
 
+        paintText.getTextBounds(textValue, 0, textValue.length, bounds)
+
+        val startPoint = marginLeft
+        val endPoint = marginLeft + widthContent
+
+        val rectFWidth = bounds.width() + (2 * TEXT_MARGIN_BOX)
+        val rectFHeight = bounds.height() + (2 * TEXT_MARGIN_BOX)
+
+        val xPosition = when {
+            pointTouch.x + rectFWidth / 2 > endPoint -> endPoint - rectFWidth + 18F
+            pointTouch.x - rectFWidth / 2 < startPoint -> startPoint - 18F
+            else -> pointTouch.x - rectFWidth / 2
+        }
+        val yPosition = pointTouch.y + 25F
+
+        pathBoxValue.reset()
+        pathBoxValue.moveTo(pointTouch.x, pointTouch.y)
+        pathBoxValue.lineTo(pointTouch.x + 18F, pointTouch.y + 30F)
+        pathBoxValue.lineTo(pointTouch.x - 18F, pointTouch.y + 30F)
+        pathBoxValue.lineTo(pointTouch.x, pointTouch.y)
+
+        canvas?.drawPath(pathBoxValue, paintBoxValue)
+
+        val rectF = RectF(
+            xPosition,
+            yPosition,
+            xPosition + rectFWidth,
+            yPosition + rectFHeight
+        )
+        canvas?.drawRoundRect(rectF, RADIUS_BOX, RADIUS_BOX, paintBoxValue)
+        canvas?.drawText(
+            textValue,
+            xPosition + TEXT_MARGIN_BOX,
+            yPosition + bounds.height() + TEXT_MARGIN_BOX,
+            paintText
+        )
     }
 
     private fun drawTextValue(canvas: Canvas?) {
@@ -172,13 +224,12 @@ class LineChart : View {
     }
 
     private val pointOnPath = mutableListOf<PointF>()
+
     private fun findPointOnCubicToPath() {
-        var i = 0f
         val pm = PathMeasure(path, false)
-        while (i <= 1) {
-            val position = floatArrayOf(0f, 0f)
-            pm.getPosTan(pm.length * i, position, null)
-            i += 0.001F
+        val position = floatArrayOf(0f, 0f)
+        for (i in 0..1000) {
+            pm.getPosTan(pm.length * i * 0.001f, position, null)
             pointOnPath.add(PointF(position[0], position[1]))
         }
     }
@@ -186,7 +237,6 @@ class LineChart : View {
     private fun drawLine(canvas: Canvas?) {
         if (pointS.isEmpty() && controlPoint1.isEmpty() && controlPoint2.isEmpty()) return
         path.reset()
-
         path.moveTo(pointS.first().x, pointS.first().y)
         for (i in 1 until pointS.size) {
             path.cubicTo(
@@ -209,11 +259,10 @@ class LineChart : View {
     }
 
     private fun drawLineVertical(canvas: Canvas?) {
-        canvas?.drawCircle(pointTouch.x, pointTouch.y, 10f, paintLine)
+        canvas?.drawCircle(pointTouch.x, pointTouch.y, 10f, paintCircle)
         canvas?.drawLine(pointTouch.x, pointTouch.y, pointTouch.x, bottomPosition, paintLine)
     }
 
-    @SuppressLint("ClickableViewAccessibility")
     override fun onTouchEvent(event: MotionEvent?): Boolean {
         if (event?.action == MotionEvent.ACTION_MOVE || event?.action == MotionEvent.ACTION_DOWN) {
             isTouch = true
@@ -231,8 +280,7 @@ class LineChart : View {
                 pointTouch = isPointValid
                 invalidate()
             }
-        }
-        if (event?.action == MotionEvent.ACTION_UP) {
+        } else {
             isTouch = false
         }
         return true
@@ -243,12 +291,12 @@ class LineChart : View {
         private const val DEFAULT_MIN_VALUE = -30
         private const val STEP = 10
         private const val MARGIN_TEXT_END = 15F
-
         private const val SPACE_TOUCH = 20F
-
         private const val MARGIN_LEFT_PARENT = 0.08f
         private const val MARGIN_TOP_PARENT = 0.05f
         private const val MARGIN_RIGHT_PARENT = 0.03f
         private const val MARGIN_BOTTOM_PARENT = 0.05f
+        private const val RADIUS_BOX = 10F
+        private const val TEXT_MARGIN_BOX = 20F
     }
 }
