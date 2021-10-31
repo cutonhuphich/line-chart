@@ -315,8 +315,8 @@ class CircleTemperature : View, ValueAnimator.AnimatorUpdateListener {
                     setValue(currentValue + 1)
                 } else setValue(currentValue - 1)
             }
-        }
-        if (event?.action == MotionEvent.ACTION_UP) {
+
+        } else {
             isTouch = false
         }
         return true

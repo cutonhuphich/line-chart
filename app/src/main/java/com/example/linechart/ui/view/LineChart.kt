@@ -39,6 +39,7 @@ class LineChart : View {
     private val paintLine = Paint()
     private val paintBackground = Paint()
     private val paintBoxValue = Paint()
+    private val paintTextValue = Paint()
     private val bounds = Rect()
 
     private val controlPoint1 = arrayListOf<PointF>()
@@ -60,6 +61,8 @@ class LineChart : View {
     }
 
     private fun calculateControlPoint() {
+        controlPoint1.clear()
+        controlPoint2.clear()
         for (i in 1 until pointS.size) {
             controlPoint1.add(PointF((pointS[i].x + pointS[i - 1].x) / 2, pointS[i - 1].y))
             controlPoint2.add(PointF((pointS[i].x + pointS[i - 1].x) / 2, pointS[i].y))
@@ -67,6 +70,7 @@ class LineChart : View {
     }
 
     private fun calculatePointS() {
+        pointS.clear()
         valueData.forEachIndexed { index, value ->
             val xPosition = (index * spaceVertical) + marginLeft
             val yPosition = bottomPosition - ((-minValue + value) * spaceBetweenLines / STEP)
@@ -128,6 +132,11 @@ class LineChart : View {
             style = Paint.Style.FILL
             color = ContextCompat.getColor(context, R.color.green)
         }
+        paintTextValue.apply {
+            isAntiAlias = true
+            textSize = 36F
+            color = ContextCompat.getColor(context, R.color.white)
+        }
     }
 
     override fun onSizeChanged(w: Int, h: Int, oldw: Int, oldh: Int) {
@@ -168,25 +177,27 @@ class LineChart : View {
         if (isTouch) {
             drawLineVertical(canvas)
             drawViewText(canvas)
+
         }
     }
 
     private fun drawViewText(canvas: Canvas?) {
         val value =
-            (minValue - (((pointTouch.y - bottomPosition) * STEP) / spaceBetweenLines)).toInt()
-        val textValue = resources.getString(R.string.tempInt, value)
+            (minValue - (((pointTouch.y - bottomPosition) * STEP) / spaceBetweenLines))
 
-        paintText.getTextBounds(textValue, 0, textValue.length, bounds)
+        val stringValue = String.format("%.1f °C", value)
 
-        val startPoint = marginLeft
-        val endPoint = marginLeft + widthContent
+        paintText.getTextBounds(stringValue, 0, stringValue.length, bounds)
+
+        val startPoint = marginLeft-18F
+        val endPoint = marginLeft + widthContent +18F
 
         val rectFWidth = bounds.width() + (2 * TEXT_MARGIN_BOX)
         val rectFHeight = bounds.height() + (2 * TEXT_MARGIN_BOX)
 
         val xPosition = when {
-            pointTouch.x + rectFWidth / 2 > endPoint -> endPoint - rectFWidth + 18F
-            pointTouch.x - rectFWidth / 2 < startPoint -> startPoint - 18F
+            pointTouch.x + rectFWidth / 2 > endPoint -> endPoint - rectFWidth
+            pointTouch.x - rectFWidth / 2 < startPoint -> startPoint
             else -> pointTouch.x - rectFWidth / 2
         }
         val yPosition = pointTouch.y + 25F
@@ -207,10 +218,10 @@ class LineChart : View {
         )
         canvas?.drawRoundRect(rectF, RADIUS_BOX, RADIUS_BOX, paintBoxValue)
         canvas?.drawText(
-            textValue,
+            stringValue,
             xPosition + TEXT_MARGIN_BOX,
             yPosition + bounds.height() + TEXT_MARGIN_BOX,
-            paintText
+            paintTextValue
         )
     }
 
@@ -280,8 +291,6 @@ class LineChart : View {
                 pointTouch = isPointValid
                 invalidate()
             }
-        } else {
-            isTouch = false
         }
         return true
     }
@@ -291,7 +300,7 @@ class LineChart : View {
         private const val DEFAULT_MIN_VALUE = -30
         private const val STEP = 10
         private const val MARGIN_TEXT_END = 15F
-        private const val SPACE_TOUCH = 20F
+        private const val SPACE_TOUCH = 25F
         private const val MARGIN_LEFT_PARENT = 0.08f
         private const val MARGIN_TOP_PARENT = 0.05f
         private const val MARGIN_RIGHT_PARENT = 0.03f

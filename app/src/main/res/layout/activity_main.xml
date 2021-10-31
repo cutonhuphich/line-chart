@@ -15,10 +15,24 @@
         app:lineMaxValue="10"
         app:lineMinValue="-30" />
 
-    <TextView
+    <RelativeLayout
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="26/05/2021" />
+        android:paddingStart="32dp"
+        android:paddingEnd="12dp"
+        android:paddingBottom="4dp"
+        android:layout_height="wrap_content">
+        <TextView
+            android:id="@+id/textViewTimeStart"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="26/05/2021" />
+        <TextView
+            android:layout_alignParentEnd="true"
+            android:id="@+id/textViewTimeEnd"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="12/06/2021" />
+    </RelativeLayout>
 
     <com.example.linechart.ui.view.CircleTemperature
         android:id="@+id/circleTemperature"
