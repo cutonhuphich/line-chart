@@ -29,6 +29,7 @@ class LineChart : View {
     private var bottomPosition = 0F
     private var heightContent = 0F
     private var widthContent = 0F
+    //cm2
 
     private val path = Path()
     private val pathBackground = Path()
@@ -243,6 +244,7 @@ class LineChart : View {
             pm.getPosTan(pm.length * i * 0.001f, position, null)
             pointOnPath.add(PointF(position[0], position[1]))
         }
+
     }
 
     private fun drawLine(canvas: Canvas?) {
